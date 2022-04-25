@@ -13,34 +13,34 @@ Some useful utilities for configuring USB HID gadget using configfs.
 
 ## Usage
 
-Before using any of these utilities, you should check if your linux kernel as well as your hardware/development board support **configuring USB Hid gadget through configfs**.
+Before using any of these utilities, you should check if your linux kernel as well as your hardware/development board itself support **configuring USB Hid gadget through configfs**.
 
-Try finding the mount point of configfs:
+1. Try finding the mount point of configfs:
 
-```bash
-sudo mount -l | grep configfs
-```
+    ```bash
+    sudo mount -l | grep configfs
+    ```
 
-if it outputs the mount point of configfs, go ahead; 
+2. if it outputs the mount point of configfs, go to **step 4**; 
 
-otherwise try load kernel module and mount it:
+3. otherwise try load kernel module and mount it:
 
-```bash
-sudo modprobe libcomposite
-CONFIGFS_HOME=XXX
-mount none $CONFIGFS_HOME -t configfs
-```
+    ```bash
+    sudo modprobe libcomposite
+    CONFIGFS_HOME=XXX
+    mount none $CONFIGFS_HOME -t configfs
+    ```
 
-and then retry the first command.
+    and then retry **step 1**.
 
-If the output is still empty, you may need to modify kernel settings and compile the kernel.
+    If the output is still empty, you may need to modify kernel settings and compile the kernel, and try **step 3&1** again.
 
-If folder `usb_gadget` doesn't exist in `$CONFIGFS_HOME`, you also need to modify kernel settings and compile the kernel.
+5. If folder `usb_gadget` doesn't exist in `$CONFIGFS_HOME`, you also need to modify kernel settings and compile the kernel.
 
 ### desc2bin
 
-1. First download [Hid-Descriptor-Tool](https://www.usb.org/document-library/hid-descriptor-tool) on a **Windows PC**, unzip and run Dt.exe. Edit your own hid descriptor or select one from the given samples along with the tool. Click "File-SaveAs" and export the descriptor to a C header file (.h).
-2. Upload the header file to your linux board. Within the desc2bin folder, mouseDesc.h and keybrdDesc.h are provided for reference or tests.
+1. First download [Hid-Descriptor-Tool](https://www.usb.org/document-library/hid-descriptor-tool) on a **Windows PC**, unzip and run Dt.exe. Edit your own hid descriptor or click "File-Open" and select one from the given samples along with the tool. Click "File-SaveAs" and export the descriptor to a C header file (.h).
+2. Upload the header file to your linux device. Within the desc2bin folder, mouseDesc.h and keybrdDesc.h are provided for reference or tests.
 
 3. Then run the convert.sh script to convert the header file to required binary file. 
     ```bash
@@ -59,7 +59,7 @@ You can replace the header file and output binary file name in commands above, a
 
 ### setup_script
 
-1. Open the `en_gadget.sh` using your favourite editor.
+1. Open the `en_gadget.sh` using your favourite text editor.
 
 2. Edit the Settings between `####[ User Settings begin]#####` and `####[ User Settings end]#####`, referring to the comments following the keys. 
 
@@ -71,17 +71,17 @@ You can replace the header file and output binary file name in commands above, a
 
     ```bash
     cd setup_script
-    sudo chmod +x ./en_gadget.sh
+    sudo chmod +x ./en_gadget.sh #if necessary
     sudo ./en_gadget.sh
     ```
 
-If the scipt print the device file like `/dev/hidg0`, `/dev/hidg1` in the end, the gadget has been set up properly.
+If the scipt print the device file like `/dev/hidg0`, `/dev/hidg1` in the end, then the gadget has been set up properly, congratulations.
 
 Note: the script DOES NOT handle any error occurred halfway, you may better look through the script and make clear exactly what it will do before execution.
 
 ### driver_sample
 
-**After gadget setup**, `hid_gadget_test.c` could be used to test the hid functions interactively.
+**After gadget setup**, `hid_gadget_test.c` could be used to test the hid functions interactively. (Note: this program is collected from [linux kernel documentation about hid gadget](https://www.kernel.org/doc/Documentation/usb/gadget_hid.txt))
 
 1. Assure you have properly set up usb hid gadget in previous steps.
 
@@ -92,9 +92,9 @@ Note: the script DOES NOT handle any error occurred halfway, you may better look
     gcc hid_gadget_test.c -o hid_gadget_test
     ```
 
-2. Connect the device to your host PC(or other host devices) using a USB cable.
+2. Connect the device to your host PC(or other USB host devices) with a USB cable.
 
-    If there is multiple USB ports on device, you need to make sure you connected the right one.
+    If there is multiple USB ports on device, make sure you connect the right one.
 
 3. If the host PC has a operating system, check the Device Manager to see if the device is recognized properly as a USB device.
 
@@ -104,9 +104,9 @@ Note: the script DOES NOT handle any error occurred halfway, you may better look
     ./hid_gadget /dev/hidgX keyboard
     ```
 
-    Where X should be replaced by your real device number printed in last step, and "keyboard" could also be replaced by "mouse" to emulate a mouse.
+    Where X should be replaced by your real device number printed by the setup script step, and "keyboard" could also be replaced by "mouse" to emulate a mouse.
 
-5. The program will print all the commands that is supported. For example, type`--left-meta e` and press Enter, the host PC will open explorer if running Windows system.
+5. The program will print all the commands that is supported. For example, type`--left-meta e` and press Enter, the host PC will open explorer on Windows system.
 
 ### python_wrap
 
@@ -114,17 +114,17 @@ This is a wrapper class of the given sample program for controlling the gadget i
 
 1. Assure you have properly set up usb hid gadget in previous steps.
 
-2. Compile the sample program to dynamic library.
+2. Compile the sample program to dynamic library, so that the C functions can be reused by python.
 
     ```bash
     cd python_wrap
-    sudo chmod +x ./get_so.sh
+    sudo chmod +x ./get_so.sh #if necessary
     ./get_so.sh
     ```
 
     Then `gadget.so` should be compiled in current folder.
 
-3. Import gadget and write your python code . For example:
+3. Import gadget, and write your python code . For example:
 
     ```python
     from gadget import Gadget
@@ -135,7 +135,7 @@ This is a wrapper class of the given sample program for controlling the gadget i
     gms.send("-65 -65 --b2")     # move left-up and right click
     ```
 
-## Reference
+## References
 
 - https://www.kernel.org/doc/Documentation/usb/gadget_hid.txt
 - https://www.kernel.org/doc/Documentation/usb/gadget_configfs.txt
